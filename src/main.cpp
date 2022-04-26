@@ -24,7 +24,7 @@ main(int argc, char **argv)
 		return 0;
 	}
 
-	fprintf(stderr, "Unknown command: `%s`.\nRun `%s help` for help",
+	fprintf(stderr, "Unknown command: `%s`.\nRun `%s help` for help.\n",
 		argv[1], argv[0]);
 	return 1;
 }

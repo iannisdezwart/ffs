@@ -23,3 +23,26 @@ FFS::util::str_eq(const char *str, ...)
 		}
 	}
 }
+
+bool
+FFS::util::should_ignore_line(const std::string &line)
+{
+	// Comments.
+
+	if (line.starts_with("#"))
+	{
+		return true;
+	}
+
+	// Empty lines and lines consisting of only spaces and tabs.
+
+	for (char c : line)
+	{
+		if (c != ' ' && c != '\t')
+		{
+			return false;
+		}
+	}
+
+	return true;
+}

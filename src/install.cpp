@@ -1,12 +1,12 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
-#include <ostream>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
 #include "install.hpp"
+#include "util.hpp"
 
 size_t
 std::hash<FFS::Dependency>::operator()(const FFS::Dependency &dep)
@@ -93,7 +93,7 @@ FFS::install()
 	{
 		// Ignore empty lines and comments.
 
-		if (line.size() == 0 || line.starts_with("#"))
+		if (util::should_ignore_line(line))
 		{
 			continue;
 		}
