@@ -17,8 +17,8 @@ struct Dependency
 
 	Dependency(const std::string &line)
 		// Dependencies are formatted as "<name> <url>".
-		: name(line.substr(0, line.find(' '))),
-		  url(line.substr(line.find(' ') + 1)) {}
+		: name(line.substr(0, line.find(": "))),
+		  url(line.substr(line.find(": ") + 2)) {}
 
 	friend bool
 	operator==(const Dependency &a, const Dependency &b);
