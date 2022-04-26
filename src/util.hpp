@@ -20,4 +20,16 @@ is_any_of(const char *str, Strings... strings)
 bool
 should_ignore_line(const std::string &line);
 
+bool
+is_space(char c);
+
+void
+trim(std::string &str);
+
+size_t
+str_hash(char *buf, size_t size);
+
+std::string
+file_hash(const std::string &file_path);
+
 }
