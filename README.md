@@ -67,13 +67,13 @@ The `build` file specifies the binaries that should be built and what source
 files they are composed of. It's a yaml file of the form:
 ```yaml
 my_binary:
-	- src/main.cpp
-	- src/other.cpp
-	- src/third.cpp
+  - src/main.cpp
+  - src/other.cpp
+  - src/third.cpp
 
 my_other_binary:
-	- src/other_main.cpp
-	- src/other.cpp
+  - src/other_main.cpp
+  - src/other.cpp
 ```
 
 The binaries are built in the `bin` directory.
