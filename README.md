@@ -1,4 +1,4 @@
-# FFS: The C/C++ package manager we've all been waiting for.
+# Fabulous Fabrication System: The C/C++ package manager we've all been waiting for.
 
 Building C/C++ software from source and managing dependencies is a huge hassle.
 Why can't we have something simple and easy to use? Something like NodeJS's
