@@ -4,87 +4,62 @@
 #include <iostream>
 #include <vector>
 
+#include "../lib/toml/toml.hpp"
 #include "build.hpp"
+#include "config.hpp"
 #include "util.hpp"
 
-std::vector<FFS::Target>
-FFS::Target::read_targets(std::ifstream &targets_file)
+FFS::Target::Target(const std::string &bin, const toml::array &srcs)
+	: bin(bin)
 {
-	std::vector<Target> targets;
-	std::string line;
-	Target target;
-	bool read_target = false;
-
-	while (std::getline(targets_file, line))
+	for (const auto &elem : srcs)
 	{
-		// Targets are formatted as follows:
-		/*
-			<bin1>:
-				- <src>
-				- <src>
-				...
-
-			<bin2>:
-				- <src>
-				- <src>
-				...
-
-			...
-		*/
-
-		// Ignore empty lines and comments.
-
-		if (util::should_ignore_line(line))
+		if (!elem.is_string())
 		{
-			continue;
+			util::die("Error: src must be a list of "
+				"strings\n`%s`: [target.%s.src]\n",
+				CONFIG_FILENAME, bin.c_str());
 		}
 
-		// If we are on the first level of indentation, we are starting
-		// a new target.
-
-		if (!util::is_space(line[0]))
-		{
-			// If we have already read a target, we need to add it
-			// to the vector.
-
-			if (read_target)
-			{
-				targets.push_back(target);
-			}
-
-			// Create a new target.
-
-			read_target = true;
-			target = {};
-			target.bin = line.substr(0, line.find(':'));
-		}
-		else
-		{
-			// If we are on the second level of indentation, we are
-			// listing the source files.
-			// Add each source file to the target.
-
-			util::trim(line);
-
-			if (!line.starts_with('-'))
-			{
-				std::cerr << "Invalid target line: " << line
-					<< std::endl;
-				exit(1);
-			}
-
-			line = line.substr(1);
-			util::trim(line);
-
-			target.srcs.push_back(line);
-		}
+		this->srcs.push_back(elem.as_string()->get());
 	}
+}
 
-	// Add the last target to the vector.
+std::vector<FFS::Target>
+FFS::Target::read_targets()
+{
+	auto config = read_config_file();
+	std::vector<Target> targets;
+	auto *targets_table = config["targets"].as_table();
 
-	if (read_target)
+	for (auto &&[ target, settings ] : *targets_table)
 	{
-		targets.push_back(target);
+		std::string bin = std::string(target.str());
+
+		if (!settings.is_table())
+		{
+			util::die("Error: targets must be a table\n"
+				"`%s`: [targets.%s]\n",
+				CONFIG_FILENAME, target.str());
+		}
+
+		auto table = *settings.as_table();
+
+		if (!table.contains("src"))
+		{
+			util::die("Error: targets must contain a \"src\" "
+				"list\n`%s`: [targets.%s.src]\n",
+				CONFIG_FILENAME, target.str());
+		}
+
+		if (!table["src"].is_array())
+		{
+			util::die("Error: targets.%s.src must be a list\n"
+				"`%s`: [targets.%s.src]\n",
+				target.str(), CONFIG_FILENAME, target.str());
+		}
+
+		targets.push_back({ bin, *table["src"].as_array() });
 	}
 
 	return targets;
@@ -117,22 +92,23 @@ compile_to_obj(const std::string &src)
 	// Compute the hash of the source file. This will be used for the file
 	// name of the object file.
 
-	std::string file_name = "obj/" + FFS::util::file_hash(src) + ".obj";
+	std::string obj = "obj/" + FFS::util::file_hash(src) + ".o";
 
 	// If the object file is already compiled, we can just return.
 
-	if (std::filesystem::exists(file_name))
+	if (std::filesystem::exists(obj))
 	{
-		return file_name;
+		return obj;
 	}
 
 	// Compile the source file.
 
 	std::string compiler = get_CXX();
-	std::string cmd = compiler + " -std=c++20 -c " + src + " -o " + file_name;
+	std::string cmd = compiler + " -std=c++20 -c " + src + " -o " + obj;
+	printf("Compiling %s to %s...\n", src.c_str(), obj.c_str());
 	system(cmd.c_str());
 
-	return file_name;
+	return obj;
 }
 
 void
@@ -145,7 +121,7 @@ const
 
 	for (const std::string &src : srcs)
 	{
-		obj_file_names.push_back(compile_to_obj(src));
+		obj_file_names.push_back(compile_to_obj("src/" + src));
 	}
 
 	// Compile the target.
@@ -159,6 +135,7 @@ const
 	}
 
 	cmd += "-o bin/" + bin;
+	printf("Linking bin/%s...\n", bin.c_str());
 	system(cmd.c_str());
 }
 
@@ -175,19 +152,7 @@ FFS::build()
 
 	std::filesystem::create_directory("obj");
 
-	// Read the `targets` file.
-	// This file contains a list of targets that can be compiled.
-
-	std::ifstream targets_file("targets");
-
-	if (!targets_file.is_open())
-	{
-		std::cerr << "The `targets` file does not exist." << std::endl
-			<< "Please create it." << std::endl;
-		return;
-	}
-
-	std::vector<Target> targets = Target::read_targets(targets_file);
+	std::vector<Target> targets = Target::read_targets();
 
 	// Iterate over all targets and compile them.
 

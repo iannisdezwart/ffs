@@ -1,0 +1,12 @@
+[dependencies]
+toml = "https://github.com/marzer/tomlplusplus"
+
+[targets.ffs]
+src = [
+	"main.cpp",
+	"build.cpp",
+	"config.cpp",
+	"help.cpp",
+	"install.cpp",
+	"util.cpp"
+]
