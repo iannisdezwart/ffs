@@ -32,4 +32,13 @@ str_hash(char *buf, size_t size);
 std::string
 file_hash(const std::string &file_path);
 
+template <typename... Args>
+[[ noreturn ]]
+void
+die(const char *fmt, Args... args)
+{
+	fprintf(stderr, fmt, args...);
+	exit(1);
+}
+
 }
