@@ -1,9 +1,9 @@
-# Fabulous Fabrication System: The C/C++ package manager we've all been waiting for.
+# Fabulous Fabrication System: The C/C++ package manager and build tool we've all been waiting for.
 
 Building C/C++ software from source and managing dependencies is a huge hassle.
-Why can't we have something simple and easy to use? Something like NodeJS's
-package manager (NPM), Ruby's Gem or Python's pip? Well, wait no longer. FFS is
-the package manager we've all been waiting for, for way too long.
+Why can't we have something simple and easy to use? Something like JavaScript's
+NPM, Ruby's Gem or Python's pip? Well, wait no longer. FFS is the package
+manager we've all been waiting for, for way too long.
 
 
 ## Installation
@@ -27,7 +27,7 @@ ffs build
 ```
 
 Any missing dependencies will be automatically installed.
-This command will build the binaries specified in the `build` file and place
+This command will build the targets specified in the `ffs.toml` file and place
 them in the `bin` directory.
 
 
@@ -38,7 +38,7 @@ To install a specific package, run:
 ffs install <package-name>
 ```
 
-This will add the package to the `dependencies` file and install it.
+This will add the package as a dependency to the `ffs.toml` file and install it.
 
 To install all missing packages, run:
 ```sh
@@ -46,34 +46,25 @@ ffs install
 ```
 
 
-### `dependencies` File
+### `ffs.toml` File
 
-The `dependencies` file is a list of packages that are required to build the
-project. It's a yaml file of the form:
-```yaml
-# name: git url
-foo: https://github.com/foo/foo.git
-bar: https://github.com/bar/bar.git
+The `ffs.toml` file stores information about the dependencies and target
+binaries of the package. Take a look at the following example:
+```toml
+[package]
+name = "my_package"
+description = "Does things."
+author = "me"
+
+[dependencies]
+some_package = "0.1.0" # Specific version from the centralised FFS registry.
+another_package = "latest" # Latest version from the centralised FFS registry.
+third_package = "https://github.com/user/repo.git" # A git repository.
+
+[targets.ffs]
+src = [
+	"main.cpp",
+	"other.cpp",
+	"third.cpp"
+]
 ```
-
-Each dependency is cloned into the `lib` directory and built if needed.
-In the future, I plan to add support for a registry of packages, so that
-a package can simply be referenced by its name.
-
-
-### `build` File
-
-The `build` file specifies the binaries that should be built and what source
-files they are composed of. It's a yaml file of the form:
-```yaml
-my_binary:
-  - src/main.cpp
-  - src/other.cpp
-  - src/third.cpp
-
-my_other_binary:
-  - src/other_main.cpp
-  - src/other.cpp
-```
-
-The binaries are built in the `bin` directory.
