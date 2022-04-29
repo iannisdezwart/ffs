@@ -138,6 +138,12 @@ FFS::util::file_hash(const std::string &file_path)
 
 	FILE *file = fopen(file_path.c_str(), "r");
 
+	if (file == nullptr)
+	{
+		die("Could not open file \"%s\" for reading: %s\n",
+			file_path.c_str(), strerror(errno));
+	}
+
 	char buf[4096];
 	size_t hash = 0;
 	ssize_t read;
