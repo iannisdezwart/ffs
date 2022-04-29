@@ -1,3 +1,8 @@
+[package]
+name = "ffs"
+description = "Fabulous Fabrication System: C/C++ package manager and build tool"
+author = "Iannis de Zwart"
+
 [dependencies]
 toml = "https://github.com/marzer/tomlplusplus"
 
