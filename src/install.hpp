@@ -15,7 +15,6 @@ struct Dependency
 {
 	std::string name;
 	std::string url;
-	bool installed = false;
 
 	Dependency(const std::string &name, const toml::node &node)
 		: name(name)
@@ -44,6 +43,10 @@ struct Dependency
 
 	friend bool
 	operator==(const Dependency &a, const Dependency &b);
+
+	bool
+	installed()
+	const;
 
 	std::string
 	root_dir()
